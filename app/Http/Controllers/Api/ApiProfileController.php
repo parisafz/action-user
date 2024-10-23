@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 /**
  * کلاس ApiProfileController برای مدیریت پروفایل کاربر.
@@ -61,12 +62,21 @@ class ApiProfileController extends Controller
             'password' => 'required|string',
         ]);
 
-        if (!Auth::attempt($login)) {
+        // sanctum
+        // if (!Auth::attempt($login)) {
+        //     return response()->json(['message' => 'Failed: invalid login info'], 401);
+        // }
+
+        // JWT
+        if (!$token = JWTAuth::attempt($login)) {
             return response()->json(['message' => 'Failed: invalid login info'], 401);
         }
 
         $user = Auth::user();
-        $token = $user->createToken('accessToken')->plainTextToken;
+
+        // sanctum
+        // $token = $user->createToken('accessToken')->plainTextToken;
+
         return response()->json([
             'message' => 'Successfully logged in.',
             'user' => Auth::user(),
@@ -81,9 +91,12 @@ class ApiProfileController extends Controller
      */
     public function logout()
     {
-        $user = Auth::user();
+        // sanctum
+        // $user = Auth::user();
+        // $user->tokens()->delete();
 
-        $user->tokens()->delete();
+        // JWT
+        JWTAuth::invalidate(JWTAuth::getToken());
 
         return response()->json(['message' => 'Successfully logged out.'], 200);
     }
